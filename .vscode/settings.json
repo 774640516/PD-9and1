@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "debug.h": "c",
+        "my_i2c_device.h": "c",
+        "pd_process.h": "c",
+        "my_spi_slave.h": "c",
+        "my_pd_device.h": "c",
+        "usb_host_config.h": "c"
+    }
+}
