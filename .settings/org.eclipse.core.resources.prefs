@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//User/Device_GPIO_I2C.c=UTF-8
 encoding//User/PD_Process.c=UTF-8
 encoding//User/my_I2C_Device.c=UTF-8
 encoding//User/my_PD_Device.c=UTF-8

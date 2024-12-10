@@ -48,6 +48,8 @@ void my_SPI_Data_Init()
         my_spi.Control_Data[i] = 0;
     }
 
+    my_spi.Control_Data[0] = 0x30;
+
     my_spi.DIO_Status = 0;
     my_spi.DIO_Time = 0;
 }
@@ -123,6 +125,9 @@ void my_SPI_Selve_Init()
 {
     my_SPI_Data_Init();
     my_SPI_Device_Init();
+
+    my_spi.DIO_Status = 1;
+    my_spi.DIO_Time = 100;
 }
 
 void my_SPI_ControlData_on(uint8_t addr, uint8_t bit)
@@ -195,7 +200,7 @@ void EXTI7_0_IRQHandler(void)
         //        printf("\r\n");
         receive_flag = 1;
         receive_addr = 0;
-            //    printf("12312312312\r\n");
+        //    printf("12312312312\r\n");
     }
 }
 
@@ -296,17 +301,20 @@ void my_spi_handle()
         if (my_spi.DIO_Time >= Tmr_Ms_Dlt)
         {
             my_spi.DIO_Time -= Tmr_Ms_Dlt;
-            if (my_spi.DIO_Time == 0)
-            {
-                printf("set DIO_Status = %d\r\n", my_spi.DIO_Status);
-                GPIO_WriteBit(GPIOB, GPIO_Pin_0, my_spi.DIO_Status);
-            }
         }
         else
         {
             my_spi.DIO_Time = 0;
+        }
+        if (my_spi.DIO_Time == 0)
+        {
             printf("set DIO_Status = %d\r\n", my_spi.DIO_Status);
             GPIO_WriteBit(GPIOB, GPIO_Pin_0, my_spi.DIO_Status);
+            if (my_spi.Control_Data[0] == 0x30 && my_spi.DIO_Status == 1)
+            {
+                my_spi.DIO_Status = 0;
+                my_spi.DIO_Time = 50;
+            }
         }
     }
 
@@ -330,13 +338,18 @@ void my_spi_handle()
                     my_spi.Control_Data[1] = receive_buff[1];
                     my_spi.Control_Data[2] = 0;
                     // my_usb_send(receive_buff[1], 0);
-                    if(receive_buff[1]){
+                    if (receive_buff[1])
+                    {
                         my_pd_open_valve();
-                    }else {
+                    }
+                    else
+                    {
                         my_pd_close_valve();
                     }
-                }else {
-                    printf("receive_buff_size = %d error\r\n",receive_buff_size);
+                }
+                else
+                {
+                    printf("receive_buff_size = %d error\r\n", receive_buff_size);
                 }
 
                 break;
@@ -364,8 +377,10 @@ void my_spi_handle()
                     if (PD_Ctl.Flag.Bit.Connected == 0)
                     {
                         set_PD_STATUS_SRC();
-//                        set_sc8726_select();
-                    }else {
+                        //                        set_sc8726_select();
+                    }
+                    else
+                    {
                         my_switch_state_pd(1);
                     }
                 }
@@ -379,7 +394,6 @@ void my_spi_handle()
         {
             printf("%02x  ", receive_buff[i]);
         }
-        printf("size = %d\r\n",receive_buff_size);
-
+        printf("size = %d\r\n", receive_buff_size);
     }
 }
